@@ -5,6 +5,16 @@
   var grid = document.getElementById("exercise-grid");
   var shuffleButton = document.getElementById("shuffle-exercises");
 
+  // Mapping exercise IDs to detail pages
+  var exercisePageMap = {
+    "cross-box": "box-jump.html",
+    "cross-battle": "battle-rope.html",
+    "cross-circuit": "circuit-kettlebell.html",
+    "bike": "bike-interval.html",
+    "rower": "confirmation.html",
+    "hiit": "hiit-sprint.html"
+  };
+
   var fallbackImage =
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'><defs><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='%231b1b24'/><stop offset='1' stop-color='%2322222d'/></linearGradient></defs><rect width='1200' height='800' fill='url(%23g)'/><circle cx='920' cy='180' r='140' fill='%23e10600' opacity='0.35'/><text x='80' y='420' fill='%23ffffff' font-family='Arial' font-size='64'>GYMZONE</text><text x='80' y='490' fill='%23b3b3b3' font-family='Arial' font-size='28'>Visuel temporaire</text></svg>";
 
@@ -239,10 +249,26 @@
     if (!src) {
       return "";
     }
-    return encodeURI(src);
+    // Handle spaces in filenames by replacing them with %20
+    return src.replace(/\s/g, "%20");
+  }
+
+  // Category color mapping
+  var categoryColors = {
+    "Musculation": "tag--power",
+    "Cardio": "tag--cardio",
+    "Cross Training": "tag--cross",
+    "Yoga": "tag--zen"
+  };
+
+  function getCategoryClass(category) {
+    return categoryColors[category] || "tag--default";
   }
 
   function cardMarkup(exercise) {
+    var encodedImagePath = resolveImageSrc(exercise.images[0]);
+    var hasDetailPage = exercisePageMap[exercise.id];
+    
     return (
       "<article class=\"exercise-card\" data-ex-id=\"" +
       exercise.id +
@@ -251,7 +277,7 @@
       (exercise.mediaClass ? " " + exercise.mediaClass : "") +
       "\">" +
       "<img src=\"" +
-      resolveImageSrc(exercise.images[0]) +
+      encodedImagePath +
       "\" data-raw-src=\"" +
       exercise.images[0] +
       "\" alt=\"" +
@@ -263,6 +289,9 @@
       exercise.title +
       "</div>" +
       "<div class=\"exercise-tags\">" +
+      "<span class=\"exercise-tag " + getCategoryClass(exercise.category) + "\">" +
+      exercise.category +
+      "</span>" +
       "<span class=\"exercise-tag\">" +
       exercise.focus +
       "</span>" +
@@ -279,9 +308,9 @@
       "</span>" +
       "</div>" +
       "<div class=\"exercise-actions\">" +
-      "<button class=\"exercise-cta\" type=\"button\">Voir details >>" +
-      "<span class=\"exercise-cta__glow\"></span>" +
-      "</button>" +
+      (hasDetailPage
+        ? "<a href=\"" + exercisePageMap[exercise.id] + "\" class=\"exercise-cta\" style=\"text-decoration: none; display: inline-flex; align-items: center; gap: 0.5ch;\">Voir details >><span class=\"exercise-cta__glow\"></span></a>"
+        : "<button class=\"exercise-cta\" type=\"button\" disabled>Non disponible<span class=\"exercise-cta__glow\"></span></button>") +
       "</div>" +
       "</div>" +
       "</article>"
@@ -301,12 +330,13 @@
         return;
       }
       img.dataset.fallbackReady = "true";
+      
+      // Preload with encoded path
+      var encodedSrc = resolveImageSrc(img.dataset.rawSrc);
+      img.src = encodedSrc;
+      
       img.addEventListener("error", function () {
-        if (!img.dataset.triedRaw && img.dataset.rawSrc) {
-          img.dataset.triedRaw = "true";
-          img.src = img.dataset.rawSrc;
-          return;
-        }
+        console.warn("Image failed to load:", img.src);
         if (img.src === fallbackImage) {
           return;
         }
@@ -362,11 +392,15 @@
         if (!exercise || !img) {
           return;
         }
+        if (exercise.images.length <= 1) {
+          return;
+        }
         var nextIndex = (currentIndex[id] + 1) % exercise.images.length;
         currentIndex[id] = nextIndex;
         img.style.opacity = "0.6";
         window.setTimeout(function () {
-          img.src = resolveImageSrc(exercise.images[nextIndex]);
+          var encodedPath = resolveImageSrc(exercise.images[nextIndex]);
+          img.src = encodedPath;
           img.style.opacity = "1";
         }, 200);
       });

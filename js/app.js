@@ -2,6 +2,18 @@
   "use strict";
 
   var storage = window.GymStorage;
+  
+  // Apply theme immediately on all pages
+  function applyStoredTheme() {
+    if (!storage) return;
+    var theme = storage.get("gymbook:theme", null);
+    var preferredTheme = theme || 
+      (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", preferredTheme);
+  }
+  
+  applyStoredTheme();
+  
   var steps = Array.prototype.slice.call(document.querySelectorAll(".step"));
   var progressFill = document.getElementById("progress-fill");
   var progressLabels = Array.prototype.slice.call(
@@ -21,7 +33,23 @@
   var bookingPhone = document.getElementById("booking-phone");
   var bookingNote = document.getElementById("booking-note");
 
+  // Only continue with booking logic if we're on the booking page
   if (!storage || !progressFill || steps.length === 0) {
+    // But still setup theme toggle if it exists
+    if (themeToggle && storage) {
+      var updateThemeButton = function() {
+        var currentTheme = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+        themeToggle.textContent = currentTheme === "light" ? "Mode sombre" : "Mode clair";
+      };
+      updateThemeButton();
+      themeToggle.addEventListener("click", function () {
+        var currentTheme = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+        var newTheme = currentTheme === "light" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        storage.set("gymbook:theme", newTheme);
+        updateThemeButton();
+      });
+    }
     return;
   }
 
@@ -56,10 +84,13 @@
     if (themeToggle) {
       themeToggle.textContent = currentTheme === "light" ? "Mode sombre" : "Mode clair";
     }
-    storage.set("gymbook:theme", currentTheme);
+    if (storage) {
+      storage.set("gymbook:theme", currentTheme);
+    }
   }
 
   function getPreferredTheme() {
+    if (!storage) return "dark";
     var stored = storage.get("gymbook:theme", null);
     if (stored) {
       return stored;
@@ -277,11 +308,8 @@
       };
       lastAddedId = entry.id;
       storage.set("gymbook:history", [entry].concat(history));
-      renderHistory();
-      buildRecap();
-      if (viewHistory) {
-        viewHistory.scrollIntoView({ behavior: "smooth" });
-      }
+      // Redirect to confirmation page
+      window.location.href = "confirmation.html";
     });
   }
 

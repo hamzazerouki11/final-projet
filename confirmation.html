@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GymZone - Confirmation</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero__glow"></div>
+        <nav class="nav">
+          <div class="brand">
+            <span class="brand__mark" aria-hidden="true">
+              <span class="brand__orb"></span>
+              <span class="brand__ring"></span>
+            </span>
+            <span class="brand__name">GYMZONE</span>
+          </div>
+          <div class="nav__links">
+            <a class="nav-link" href="index.html">Accueil</a>
+            <a class="nav-link" href="cross-training.html">Cross Training</a>
+            <a class="nav-link" href="box-jump.html">Box Jump</a>
+            <a class="nav-link" href="battle-rope.html">Battle Rope</a>
+            <a class="nav-link" href="circuit-kettlebell.html">Kettlebell</a>
+            <a class="nav-link" href="bike-interval.html">Bike Interval</a>
+            <a class="nav-link" href="hiit-sprint.html">HIIT Sprint</a>
+          </div>
+          <div class="nav__actions">
+            <button class="ghost theme-toggle" id="theme-toggle" type="button">Mode clair</button>
+          </div>
+        </nav>
+        <div class="hero__content">
+          <h1>Confirmation de réservation</h1>
+          <p class="muted">Votre séance a été réservée avec succès.</p>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="exercise-page">
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel__header">
+                <div class="panel__title">Détails de votre réservation</div>
+              </div>
+              <div class="recap" id="recap"></div>
+            </div>
+            <div class="panel panel--center">
+              <div class="check">
+                <div class="check__ring"></div>
+                <div class="check__icon">✓</div>
+              </div>
+              <div class="success-text">
+                Votre séance est réservée avec succès !
+              </div>
+              <p class="muted" style="margin-top: 20px; font-size: 14px;">
+                Un email de confirmation a été envoyé à votre adresse.
+              </p>
+              <div class="hero-actions" style="margin-top: 40px;">
+                <a class="cta cta--solid" href="index.html">Retour à l'accueil</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="site-footer__content">
+          <div>
+            <h3 class="site-footer__title">Navigation</h3>
+            <div class="site-footer__links">
+              <a href="index.html">Reservation</a>
+              <a href="cross-training.html">Cross Training</a>
+              <a href="box-jump.html">Box Jump</a>
+              <a href="battle-rope.html">Battle Rope</a>
+              <a href="circuit-kettlebell.html">Circuit Kettlebell</a>
+              <a href="bike-interval.html">Bike Interval</a>
+              <a href="hiit-sprint.html">HIIT Sprint</a>
+            </div>
+          </div>
+          <div>
+            <h3 class="site-footer__title">Entreprise</h3>
+            <div class="site-footer__links">
+              <a href="#">A propos</a>
+              <a href="#">Blog</a>
+              <a href="#">Tarifs</a>
+            </div>
+          </div>
+          <div>
+            <h3 class="site-footer__title">Légal</h3>
+            <div class="site-footer__links">
+              <a href="#">Conditions d'usage</a>
+              <a href="#">Politique Confidentialité</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="js/storage.js" defer></script>
+    <script src="js/app.js" defer></script>
+    <script defer>
+      (function () {
+        "use strict";
+        
+        var storage = window.GymStorage;
+        var recapEl = document.getElementById("recap");
+        
+        if (!storage || !recapEl) return;
+        
+        // Get the last booking from history
+        var history = storage.get("gymbook:history", []);
+        if (!history.length) {
+          recapEl.innerHTML = "<p class='muted'>Aucune réservation trouvée.</p>";
+          return;
+        }
+        
+        var entry = history[0];
+        
+        var items = [
+          { label: "Séance", value: entry.session },
+          { label: "Date", value: entry.date },
+          { label: "Heure", value: entry.time },
+          { label: "Nom", value: entry.name },
+          { label: "Email", value: entry.email },
+          { label: "Téléphone", value: entry.phone },
+          { label: "Note", value: entry.note }
+        ];
+        
+        items.forEach(function (item) {
+          var row = document.createElement("div");
+          row.className = "recap__item";
+          row.innerHTML = "<span class=\"muted\">" + item.label + "</span><span>" + item.value + "</span>";
+          recapEl.appendChild(row);
+        });
+      })();
+    </script>
+  </body>
+</html>
